@@ -14,9 +14,26 @@ jobs:
 
     steps:
       - uses: actions/checkout@v3
+
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 16
+
       - run: npm install
-      - run: npm test
+
+      - name: Run tests with Jest
+        run: npm test
+        id: test
+
+      - name: Comment Jira with test result
+        uses: atlassian/gajira-action@v2
+        with:
+          jira-url: "https://msettecasse.atlassian.net/"
+          jira-issue: "SCRUM-1" # Cambia esto al ID de tu ticket de Jira
+          jira-user: ${{ secrets.JIRA_USER }}
+          jira-token: ${{ secrets.JIRA_TOKEN }}
+          comment: |
+            The tests have finished running! Here are the results: 
+            - Test Passed: ${{ steps.test.outcome == 'success' }}
+            - Test Failed: ${{ steps.test.outcome == 'failure' }}
